@@ -1,9 +1,10 @@
 package main
 
 import (
-	//"image/color"
+	
 	"math/rand"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -25,6 +26,8 @@ const (
 type Game struct {
 	espacios          [capacidadEstacionamiento]bool // true si ocupado, false si libre
 	vehiculosRestantes int                             // Contador de vehículos restantes
+	puertaEntrada     sync.Mutex                      // Mutex para la puerta de entrada/salida
+	vehiculosBloqueados sync.WaitGroup                 // WaitGroup para manejar vehículos bloqueados
 }
 
 func (g *Game) Update() error {
@@ -60,6 +63,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	drawContador(screen, g.vehiculosRestantes)
 }
 
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return 640, 400 // Tamaño de la ventana
+}
+
 func drawEspacio(screen *ebiten.Image, x, y float64, ocupado bool) {
 	espacio := ebiten.NewImage(espacioAncho, espacioAlto)
 	if ocupado {
@@ -85,25 +92,34 @@ func drawContador(screen *ebiten.Image, vehiculosRestantes int) {
 	ebitenutil.DebugPrint(screen, text) // Usar DebugPrint directamente en el screen
 }
 
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return 640, 480
-}
-
 func (g *Game) simularLlegadaVehiculos() {
 	g.vehiculosRestantes = totalVehiculos // Inicializar el contador
 	for i := 0; i < totalVehiculos; i++ {
 		time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond) // Simular tiempo de llegada aleatorio
 
+		g.puertaEntrada.Lock() // Bloquear acceso a la puerta
 		// Buscar un espacio disponible
+		espacioEncontrado := false
 		for j := 0; j < capacidadEstacionamiento; j++ {
 			if !g.espacios[j] { // Si el espacio está libre
 				g.espacios[j] = true // Marcar como ocupado
+				g.vehiculosBloqueados.Add(1) // Añadir al WaitGroup
+				espacioEncontrado = true
 				go g.vehiculoOcupando(j) // Simular el tiempo que el vehículo está en el estacionamiento
 				break
 			}
 		}
+		if !espacioEncontrado {
+			// No hay espacio, bloquear el vehículo
+			g.puertaEntrada.Unlock() // Desbloquear la puerta
+			time.Sleep(1 * time.Second) // Esperar un segundo antes de intentar de nuevo
+			i-- // Intentar el mismo vehículo de nuevo
+			continue // Continuar el ciclo sin incrementar el contador
+		}
+		g.puertaEntrada.Unlock() // Desbloquear la puerta
 		g.vehiculosRestantes-- // Disminuir el contador
 	}
+	g.vehiculosBloqueados.Wait() // Esperar a que todos los vehículos se vayan
 }
 
 func (g *Game) vehiculoOcupando(indice int) {
@@ -112,7 +128,10 @@ func (g *Game) vehiculoOcupando(indice int) {
 	time.Sleep(tiempoOcupacion) // Simular ocupación
 
 	// Liberar el espacio
+	g.puertaEntrada.Lock() // Bloquear acceso a la puerta
 	g.espacios[indice] = false
+	g.puertaEntrada.Unlock() // Desbloquear la puerta
+	g.vehiculosBloqueados.Done() // Indicar que el vehículo bloqueado ha salido
 }
 
 func main() {
