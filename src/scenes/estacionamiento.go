@@ -29,7 +29,7 @@ func (g *Game) GetVehiculosRestantes() int {
     return g.vehiculosRestantes
 }
 
-func (g *Game) SimularLlegadaVehiculos(actualizarUI func([CapacidadEstacionamiento]bool, int)) {
+func (g *Game) SimularLlegadaVehiculos(actualizarUI func([CapacidadEstacionamiento]bool, int, bool, bool)) {
     for i := 0; i < 100; i++ {
         llegadaTiempo := time.Duration(rand.ExpFloat64() * 1000) * time.Millisecond
         time.Sleep(llegadaTiempo) // Simula llegada con distribución Poisson
@@ -37,6 +37,7 @@ func (g *Game) SimularLlegadaVehiculos(actualizarUI func([CapacidadEstacionamien
         go func() {
             for {
                 g.puertaEntrada.Lock()
+                actualizarUI(g.espacios, g.vehiculosRestantes, true, false) // Puerta ocupada por un vehículo entrante
 
                 // Buscar un espacio disponible
                 espacioEncontrado := false
@@ -52,7 +53,6 @@ func (g *Game) SimularLlegadaVehiculos(actualizarUI func([CapacidadEstacionamien
 
                 if espacioEncontrado {
                     g.vehiculosRestantes--
-                    actualizarUI(g.espacios, g.vehiculosRestantes)
                     g.puertaEntrada.Unlock()
                     break // Salir del ciclo si el vehículo consiguió un espacio
                 } else {
@@ -65,13 +65,17 @@ func (g *Game) SimularLlegadaVehiculos(actualizarUI func([CapacidadEstacionamien
     g.vehiculosBloqueados.Wait() // Esperar a que todos los vehículos se vayan
 }
 
-func (g *Game) ocuparEspacio(indice int, actualizarUI func([CapacidadEstacionamiento]bool, int)) {
+func (g *Game) ocuparEspacio(indice int, actualizarUI func([CapacidadEstacionamiento]bool, int, bool, bool)) {
     tiempoOcupacion := time.Duration(rand.Intn(3)+3) * time.Second
     time.Sleep(tiempoOcupacion)
 
+    // Simular salida del vehículo
     g.puertaEntrada.Lock()
     g.espacios[indice] = false
-    actualizarUI(g.espacios, g.vehiculosRestantes)
     g.puertaEntrada.Unlock()
+
+    // Actualiza el estado de la puerta de salida
+    actualizarUI(g.espacios, g.vehiculosRestantes, false, true)
+
     g.vehiculosBloqueados.Done() // Indicar que el vehículo ha salido
 }
