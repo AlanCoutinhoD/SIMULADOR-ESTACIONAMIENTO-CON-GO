@@ -1,7 +1,6 @@
 package views
 
 import (
-    //"log"
     "strconv"
 
     "github.com/hajimehoshi/ebiten/v2"
@@ -15,8 +14,8 @@ const (
     EspacioMargen   = 8
     Filas           = 10
     Columnas        = 2
-    AnchoPantalla   = 640
-    AltoPantalla    = 500
+    AnchoPantalla   = 800 // Aumentado para un mayor tamaño de ventana
+    AltoPantalla    = 600 // Aumentado para un mayor tamaño de ventana
     AnchoEntrada     = 100
     AltoEntrada      = 30
     AnchoSalida      = 100
@@ -60,7 +59,7 @@ func (gi *GameInterface) Draw(screen *ebiten.Image) {
                 continue // Asegurarse de no exceder el límite del array
             }
             x := desplazamientoX + float64(columna*(EspacioAncho+EspacioMargen))
-            y := float64(fila*(EspacioAlto+EspacioMargen)) + AltoEntrada + 20
+            y := float64(fila*(EspacioAlto+EspacioMargen)) + AltoEntrada + 40 // Aumentar espacio entre entrada/salida y estacionamiento
             drawEspacio(screen, x, y, gi.Espacios[indice], gi.CarImage)
 
             if columna < Columnas-1 {
