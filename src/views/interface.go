@@ -6,6 +6,7 @@ import (
     "github.com/hajimehoshi/ebiten/v2"
     "github.com/hajimehoshi/ebiten/v2/ebitenutil"
     "golang.org/x/image/colornames"
+    "ball/src/scenes" // Importar el paquete donde se define GameUpdate
 )
 
 const (
@@ -77,6 +78,19 @@ func (gi *GameInterface) Draw(screen *ebiten.Image) {
 
 func (gi *GameInterface) Layout(outsideWidth, outsideHeight int) (int, int) {
     return AnchoPantalla, AltoPantalla
+}
+
+func (gi *GameInterface) ListenToUpdates(updates chan scenes.GameUpdate) {
+    for update := range updates {
+        gi.UpdateStatus(update.Espacios, update.VehiculosRestantes, update.PuertaOcupada, update.PuertaSalidaOcupada)
+    }
+}
+
+func (gi *GameInterface) UpdateStatus(espacios [20]bool, vehiculosRestantes int, puertaOcupada bool, puertaSalidaOcupada bool) {
+    gi.Espacios = espacios
+    gi.VehiculosRestantes = vehiculosRestantes
+    gi.PuertaOcupada = puertaOcupada
+    gi.PuertaSalidaOcupada = puertaSalidaOcupada
 }
 
 func drawEntrada(screen *ebiten.Image, ocupada bool) {
