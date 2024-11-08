@@ -2,8 +2,8 @@ package main
 
 import (
     "log"
-    "math/rand"
-    "time"
+    //"math/rand"
+   // "time"
 
     "ball/src/scenes"
     "ball/src/views"
@@ -13,15 +13,15 @@ import (
 )
 
 func main() {
-    rand.Seed(time.Now().UnixNano())
+   // rand.Seed(time.Now().UnixNano())
 
-    // Cargar la imagen del carro
-    carImg, _, err := ebitenutil.NewImageFromFile("assets/images/carrote.png") // Asegúrate de que la ruta sea correcta
+    
+    carImg, _, err := ebitenutil.NewImageFromFile("assets/images/carrote.png") 
     if err != nil {
         log.Fatal(err)
     }
 
-    // Inicializar el estado del juego
+    // Inicializar el estado del simulador
     game := scenes.NewGame()
 
     // Crear la interfaz de usuario, pasando el estado inicial y la imagen del carro
@@ -33,7 +33,7 @@ func main() {
     // Iniciar la simulación de vehículos
     go game.SimularLlegadaVehiculos()
 
-    // Iniciar el juego
+    // Iniciar 
     if err := ebiten.RunGame(gui); err != nil {
         log.Fatal(err)
     }

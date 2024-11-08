@@ -6,7 +6,7 @@ import (
     "github.com/hajimehoshi/ebiten/v2"
     "github.com/hajimehoshi/ebiten/v2/ebitenutil"
     "golang.org/x/image/colornames"
-    "ball/src/scenes" // Importar el paquete donde se define GameUpdate
+    "ball/src/scenes" 
 )
 
 const (
@@ -15,14 +15,14 @@ const (
     EspacioMargen   = 8
     Filas           = 10
     Columnas        = 2
-    AnchoPantalla   = 800 // Aumentado para un mayor tamaño de ventana
-    AltoPantalla    = 600 // Aumentado para un mayor tamaño de ventana
+    AnchoPantalla   = 800 
+    AltoPantalla    = 600 
     AnchoEntrada     = 100
     AltoEntrada      = 30
     AnchoSalida      = 100
     AltoSalida       = 30
-    OffsetEntradaX   = 250 // Nueva constante para mover la entrada
-    OffsetSalidaX    = 400 // Nueva constante para mover la salida
+    OffsetEntradaX   = 250 
+    OffsetSalidaX    = 400 
 )
 
 type GameInterface struct {
@@ -30,10 +30,10 @@ type GameInterface struct {
     VehiculosRestantes int
     PuertaOcupada      bool
     PuertaSalidaOcupada bool // Añadido para el estado de la puerta de salida
-    CarImage           *ebiten.Image // Imagen del carro
+    CarImage           *ebiten.Image 
 }
 
-// Nueva función para cargar la interfaz del juego, aceptando la imagen del carro
+
 func NewGameInterface(carImg *ebiten.Image) *GameInterface {
     return &GameInterface{
         CarImage: carImg,
